@@ -5,8 +5,8 @@ date: "04/11/2019"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo  = TRUE)
 library(tidyverse)
 library(rvest)
 library(purrr)
@@ -51,39 +51,38 @@ as_tibble() #Applying the function to the columns of iris_with_missing using a m
 #Creating a tidy dataframe containing data from all participants, including the subject ID, arm, and observations over time:
 
 ```{r}
-files = list.files("./data")
+file_name = list.files("./data")
 
-subject_data = data_frame(
-  file_name = files
-  ) %>% 
-mutate(file_contents = map(
-  file_name, ~read_csv(file.path("./data", .))
-  )
-  ) %>%
-unnest() %>% 
+read_csv_files = 
+  function(file_name) {
+    subject_data = read_csv(
+      file = str_c("./data/", file_name)
+      ) %>%
+      mutate(
+        file = file_name
+      )
+    }
+subject_data = map_df(
+  file_name, read_csv_files
+) %>%
 pivot_longer(
   week_1:week_8, names_to = "week",
-values_to = "measurement"
-) %>% 
-separate(
-  file_name, sep = ".c", into = c("file_name", "remove")
-  ) %>% 
-  select(
-    -remove
-    ) %>% 
-separate(
-  file_name, into = c("group", "subject_id"), sep = "_"
-  ) %>% 
-mutate(
-group = recode(group,
-`con` = "control",
-`exp` = "experimental")
-)
+  values_to = "measurement"
+  ) %>%
+  separate(
+    file, into = c("group","subject",sep = "-")
+    ) %>%
+  mutate(
+    group = recode(group,"con" = "control","exp" = "experimental")
+    ) %>%
+  select(group,subject,week,measurement)
 ```
+
+
 ```{r}
 subject_data %>%
-  ggplot(aes(x = week, y = measurement, group = subject_id, color = subject_id)) + 
-  geom_path() +
+  ggplot(aes(x = week, y = measurement, group = subject, color = subject)) + 
+  geom_line() +
   facet_grid(~group) + 
   labs(
     x = "Week",
