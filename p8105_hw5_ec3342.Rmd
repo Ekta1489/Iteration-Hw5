@@ -7,6 +7,17 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+library(purrr)
+library(viridis)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
 ```
 # Question 1
 
@@ -22,7 +33,7 @@ iris_with_missing = iris %>%
   mutate(Species = as.character(Species))
 ```
 ```{r}
-replace_miss = function(x) {
+rpl_miss = function(x) {
 if (is.numeric(x))
   { 
   x = replace_na(x, mean(x, na.rm = TRUE)) #Using a function to replace the missing values of numeric variables with the mean of non-missing values
@@ -30,9 +41,61 @@ if (is.numeric(x))
 else if (is.character(x)) {
 x = replace_na(x,"virginica")} #Using a function to replace the missing values of character variables, with "virginica"
   }
-iris_new = map(iris_with_missing, replace_miss) %>% 
+iris_new = map(iris_with_missing, rpl_miss) %>% 
 as_tibble() #Applying the function to the columns of iris_with_missing using a map statement.
 
-
 ```
+
+# Question 2
+
+#Creating a tidy dataframe containing data from all participants, including the subject ID, arm, and observations over time:
+
+```{r}
+files = list.files("./data")
+
+subject_data = data_frame(
+  file_name = files
+  ) %>% 
+mutate(file_contents = map(
+  file_name, ~read_csv(file.path("./data", .))
+  )
+  ) %>%
+unnest() %>% 
+pivot_longer(
+  week_1:week_8, names_to = "week",
+values_to = "measurement"
+) %>% 
+separate(
+  file_name, sep = ".c", into = c("file_name", "remove")
+  ) %>% 
+  select(
+    -remove
+    ) %>% 
+separate(
+  file_name, into = c("group", "subject_id"), sep = "_"
+  ) %>% 
+mutate(
+group = recode(group,
+`con` = "control",
+`exp` = "experimental")
+)
+```
+```{r}
+subject_data %>%
+  ggplot(aes(x = week, y = measurement, group = subject_id, color = subject_id)) + 
+  geom_path() +
+  facet_grid(~group) + 
+  labs(
+    x = "Week",
+    y = "Observation"
+  ) + 
+  theme(
+    legend.position = "bottom"
+  ) + viridis::scale_color_viridis(
+    name = "Subject ID",
+    discrete = TRUE
+  )
+  
+```
+
 
