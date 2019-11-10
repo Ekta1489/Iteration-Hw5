@@ -11,6 +11,7 @@ library(tidyverse)
 library(rvest)
 library(purrr)
 library(viridis)
+library(broom)
 knitr::opts_chunk$set(
 	echo = TRUE,
 	warning = FALSE,
@@ -50,7 +51,9 @@ as_tibble() #Applying the function to the columns of iris_with_missing using a m
 
 #Creating a tidy dataframe containing data from all participants, including the subject ID, arm, and observations over time:
 #Starting with a dataframe containing all file names using the list.files function.
+
 ```{r}
+
 file_name = list.files("./data")
 
 read_csv_files = 
@@ -61,7 +64,10 @@ read_csv_files =
       mutate(
         file = file_name
       )
-    }
+  }
+
+#Iterating over file names and reading in data for each subject using map and saving the result as a new variable in the dataframe
+
 study_data = map_df(
   file_name, read_csv_files
 ) %>%
@@ -79,9 +85,12 @@ pivot_longer(
 ```
 
 
+#Making a spaghetti plot showing observations on each subject over time, to find the difference between the two groups.
+
 ```{r}
 study_data %>%
   ggplot(aes(x = week, y = measurement, group = subject, color = subject)) + 
+  geom_point() +
   geom_line() +
   facet_grid(~group) + 
   labs(
@@ -97,6 +106,7 @@ study_data %>%
   )
   
 ```
+#As we can see from the two plots above, in the experimental arm there is an increase in the observation score with time. In the control arm, however the observation score remains somewhat constant. This shows that treatment might be effective as the experimental arm shows an increase in the observation scores with time. However, further analysis should be done to conclude this.
 
 # Question 3
 
