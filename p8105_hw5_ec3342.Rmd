@@ -116,6 +116,10 @@ This shows that treatment might be effective as the experimental arm shows an in
 
 # Question 3
 
+#Conducting a simulation to explore power in a simple linear regression.
+
+#Fixed the following design elements: n=30, beta0=2,beta1 = 0,σ2=50 i.e. sd= sqrt(50) and formed the linear model.
+
 ```{r}
 set.seed(1)
 
@@ -135,20 +139,21 @@ sim_regression = function(n = 30, beta0 = 2, beta1 = 0) {
 }
 ```
 
-
+#Generating 10000 datasets from the model.
 ```{r}
+
 sim_results = tibble(
-  beta_1 = c(0,1,2,3,4,5,6)
+  beta_1 = c(0,1,2,3,4,5,6) #Repeating for β1={1,2,3,4,5,6}
   ) %>%
   mutate(
-    output_list = map(.x = beta_1, ~rerun(10000, sim_regression(beta1 = .x))),
-  output_df = map(output_list, bind_rows)
-  ) %>%
+    output_list = map(.x = beta_1, ~rerun(10000, sim_regression(beta1 = .x))), #Generating 10000 datasets
+  output_df = map(output_list, bind_rows) #bind_rows used to join the results across each individual runs of the simulation
+  ) %>% 
   unnest(output_df) %>%
   select(beta_1,beta1_hat,p_value) 
   
 ```
-#Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of β1 on the x axis. Describe the association between effect size and power.
+#Making a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of β1 on the x axis. 
 
 ```{r}
 sim_results %>%
@@ -158,13 +163,48 @@ sim_results %>%
     proportion_reject = n/10000 * 100
   ) %>%
   filter(reject_null == "TRUE") %>%
-  ggplot(aes(x = beta_1, y = proportion_reject)) + geom_line() + labs(
+  ggplot(aes(x = beta_1, y = proportion_reject, color = proportion_reject)) + geom_point() + geom_line() + labs(
     title = "Proportion of times null was rejected",
+    x = "True Beta_1 values",
+    y = "Proportion of times null was rejected/ Power"
+  ) + scale_x_continuous(
+    breaks = c(0,1,2,3,4,5,6),
+    labels = c(0,1,2,3,4,5,6)
+  )
+  theme_bw()
+```
+#Describe the association between effect size and power.
+
+
+
+
+#Make a plot showing the average estimate of Beta_1 on the y axis and the true value of Beta_1 on the x axis. Make a second plot (or overlay on the first) the average estimate of Beta_1 only in samples for which the null was rejected on the y axis and the true value of Beta_1 on the x axis. Is the sample average of Beta1_hat across tests for which the null is rejected approximately equal to the true value of Beta_1? Why or why not?
+
+```{r}
+sim_results %>%
+  group_by(beta_1) %>%
+  summarise(
+    mean = mean(beta1_hat)
+  ) %>%
+  ggplot(aes(x = beta_1, y = mean)) + geom_line() + labs(
+    title = "average estimate of beta1_hat vs true value of beta_1",
     x = "Beta_1",
-    y = "Proportion of times null was rejected"
+    y = "Mean"
   ) + 
   theme_bw()
 ```
-
-
+```{r}
+sim_results %>%
+  group_by(beta_1) %>%
+  filter(p_value < 0.05) %>%
+  summarise(
+    mean = mean(beta1_hat)
+  ) %>%
+  ggplot(aes(x = beta_1, y = mean)) + geom_line() + labs(
+    title = "average estimate of beta1_hat vs true value of beta_1",
+    x = "Beta_1",
+    y = "Mean"
+  ) + 
+  theme_bw()
+```
 
