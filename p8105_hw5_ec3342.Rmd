@@ -71,6 +71,7 @@ read_csv_files =
 ```
 
 #Iterate over file names and read in data for each subject using purrr::map and saving the result as a new variable in the dataframe
+
 #Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
 
 ```{r}
@@ -170,11 +171,12 @@ sim_results = tibble(
 
 sim_results %>%
   group_by(beta_1) %>%
-  count(reject_null = p_value < 0.05) %>%
-  mutate(
-    proportion_reject = n/10000 * 100
+  summarise(
+    n_rej = length(which(p_value < 0.05))
   ) %>%
-  filter(reject_null == "TRUE") %>%
+  mutate(
+    proportion_reject = n_rej/10000 * 100
+  ) %>%
   ggplot(aes(x = beta_1, y = proportion_reject, color = proportion_reject)) + geom_point() + geom_line() + labs(
     title = "Proportion of times null was rejected",
     x = "True Beta_1 values",
@@ -205,7 +207,7 @@ sim_results %>%
 
 ```
 
-#Make a second plot (or overlay on the first) the average estimate of Beta_1 only in samples for which the null was rejected on the y axis and the true value of Beta_1 on the x axis. Is the sample average of Beta1_hat across tests for which the null is rejected approximately equal to the true value of Beta_1? Why or why not?
+#Make a second plot (or overlay on the first) the average estimate of Beta_1 only in samples for which the null was rejected on the y axis and the true value of Beta_1 on the x axis. 
 
 ```{r}
 
@@ -224,3 +226,6 @@ sim_results %>%
 
 ```
 
+#Is the sample average of Beta1_hat across tests for which the null is rejected approximately equal to the true value of Beta_1? Why or why not?
+
+#No, the sample average of Beta1_hat across tests for which the null is rejected is not approximately equal to the true value of Beta_1.
