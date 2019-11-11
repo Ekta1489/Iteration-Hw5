@@ -120,7 +120,6 @@ study_data %>%
 **Description of the plots:**
 
 As we can see from the two plots above, in the experimental arm there is an increase in the observation score with time. In the control arm, however the observation score remains somewhat constant. 
-This shows that treatment might be effective as the experimental arm shows an increase in the observation scores with time.
 
 # Question 3
 
@@ -180,14 +179,15 @@ sim_results %>%
   ggplot(aes(x = beta_1, y = proportion_reject, color = proportion_reject)) + geom_point() + geom_line() + labs(
     title = "Proportion of times null was rejected",
     x = "True Beta_1 values",
-    y = "Proportion of times null was rejected/ Power"
+    y = "Proportion of times null was rejected"
   ) + 
   theme_bw()
 
 ```
 
 #Describe the association between effect size and power.
-As the effect size increases, power increases. 
+
+* As the effect size increases, power increases --> There is a linear relationship between the effect size and power! 
 
 #Make a plot showing the average estimate of Beta1_hat on the y axis and the true value of Beta_1 on the x axis. 
 
