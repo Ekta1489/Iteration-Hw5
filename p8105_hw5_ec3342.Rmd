@@ -167,18 +167,14 @@ sim_results %>%
     title = "Proportion of times null was rejected",
     x = "True Beta_1 values",
     y = "Proportion of times null was rejected/ Power"
-  ) + scale_x_continuous(
-    breaks = c(0,1,2,3,4,5,6),
-    labels = c(0,1,2,3,4,5,6)
-  )
+  ) + 
   theme_bw()
 ```
+
 #Describe the association between effect size and power.
+As the effect size increases, power increases. 
 
-
-
-
-#Make a plot showing the average estimate of Beta_1 on the y axis and the true value of Beta_1 on the x axis. Make a second plot (or overlay on the first) the average estimate of Beta_1 only in samples for which the null was rejected on the y axis and the true value of Beta_1 on the x axis. Is the sample average of Beta1_hat across tests for which the null is rejected approximately equal to the true value of Beta_1? Why or why not?
+#Make a plot showing the average estimate of Beta1_hat on the y axis and the true value of Beta_1 on the x axis. 
 
 ```{r}
 sim_results %>%
@@ -186,21 +182,25 @@ sim_results %>%
   summarise(
     mean = mean(beta1_hat)
   ) %>%
-  ggplot(aes(x = beta_1, y = mean)) + geom_line() + labs(
-    title = "average estimate of beta1_hat vs true value of beta_1",
-    x = "Beta_1",
-    y = "Mean"
+  ggplot(aes(x = beta_1, y = mean, color = mean)) + geom_line() + labs(
+    title = "Average estimate of true value of beta_1 vs average estimate of beta1_hat",
+    x = "True value of Beta_1",
+    y = "Average estimate of Beta1_hat"
   ) + 
   theme_bw()
 ```
+
+#Make a second plot (or overlay on the first) the average estimate of Beta_1 only in samples for which the null was rejected on the y axis and the true value of Beta_1 on the x axis. Is the sample average of Beta1_hat across tests for which the null is rejected approximately equal to the true value of Beta_1? Why or why not?
+
 ```{r}
+
 sim_results %>%
   group_by(beta_1) %>%
   filter(p_value < 0.05) %>%
   summarise(
     mean = mean(beta1_hat)
   ) %>%
-  ggplot(aes(x = beta_1, y = mean)) + geom_line() + labs(
+  ggplot(aes(x = beta_1, y = mean, color = mean)) + geom_point() + geom_line() + labs(
     title = "average estimate of beta1_hat vs true value of beta_1",
     x = "Beta_1",
     y = "Mean"
