@@ -228,4 +228,4 @@ sim_results %>%
 
 #Is the sample average of Beta1_hat across tests for which the null is rejected approximately equal to the true value of Beta_1? Why or why not?
 
-#No, the sample average of Beta1_hat across tests for which the null is rejected is not approximately equal to the true value of Beta_1.
+#No, the sample average of Beta1_hat across tests for which the null is rejected is not approximately equal to the true value of Beta_1. As the true value of Beta_1 increases, the effect size increases and therefore, the power increases.
